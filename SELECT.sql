@@ -394,12 +394,21 @@ OR DA.DefectID IN (SELECT DefectID FROM Defects WHERE ProjectID = 1) -- Заме
 ORDER BY E.LastName, E.FirstName;
 
 -- 44. Выбрать общее количество однофамильцев-тезок в БД.
-SELECT COUNT(*) AS TotalDuplicates
-FROM (
-  SELECT LastName, FirstName, MiddleName, COUNT(*) OVER (PARTITION BY LastName, FirstName, MiddleName) AS DuplicateCount
-  FROM Employees
-) AS DuplicateEmployees
-WHERE DuplicateCount > 1;
+SELECT 
+    (SELECT COUNT(*)
+     FROM (
+         SELECT FirstName
+         FROM Employees
+         GROUP BY FirstName
+         HAVING COUNT(*) > 1
+     ) AS NameDuplicates) +
+    (SELECT COUNT(*)
+     FROM (
+         SELECT LastName
+         FROM Employees
+         GROUP BY LastName
+         HAVING COUNT(*) > 1
+     ) AS LastNameDuplicates) AS TotalDuplicates;
 
 -- 45. Выбрать месяцы текущего и прошлого годов, в которых закрыто наибольшее количество дефектов.
 SELECT 
