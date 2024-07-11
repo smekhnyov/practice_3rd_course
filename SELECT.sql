@@ -473,13 +473,19 @@ HAVING COUNT(*) > 1;
 
 -- 43. В одном столбце вывести фамилию, имя, отчество всех, кто связан с проектом Х. 
 -- Результат отсортировать по фамилии и имени в лексикографическом порядке.
-SELECT DISTINCT E.LastName || ' ' || E.FirstName || ' ' || E.MiddleName AS FullName
-FROM Employees E
-LEFT JOIN Defects D ON E.EmployeeID = D.DiscoveredBy
-LEFT JOIN DefectAssignees DA ON E.EmployeeID = DA.AssigneeID
-WHERE D.ProjectID = 1 -- Замените 1 на ID нужного проекта
-OR DA.DefectID IN (SELECT DefectID FROM Defects WHERE ProjectID = 1) -- Замените 1 на ID нужного проекта
-ORDER BY E.LastName, E.FirstName;
+SELECT 
+    e.LastName || ' ' || e.FirstName || ' ' || COALESCE(e.MiddleName, '') AS FullName
+FROM 
+    Employees e
+INNER JOIN 
+    EmployeeProjects ep ON e.EmployeeID = ep.EmployeeID
+INNER JOIN 
+    Projects p ON ep.ProjectID = p.ProjectID
+WHERE 
+    p.ProjectName = 'ProjectName'
+ORDER BY 
+    e.LastName, e.FirstName;
+
 
 -- 44. Выбрать общее количество однофамильцев-тезок в БД.
 SELECT 
