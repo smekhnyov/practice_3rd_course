@@ -237,15 +237,33 @@ LEFT JOIN DefectStatusHistory DSH ON D.DefectID = DSH.DefectID AND S.StatusID = 
 -- 28. Выбрать название проекта, фамилию, имя, отчество руководителя проекта и, 
 -- если по проекту были неисправленные дефекты, то количество дефектов.
 SELECT 
-  P.ProjectName,
-  E.LastName,
-  E.FirstName,
-  E.MiddleName,
-  SUM(CASE WHEN D.IsFixed = FALSE THEN 1 ELSE 0 END) AS UnfixedDefectCount
-FROM Projects P
-LEFT JOIN Employees E ON P.ProjectID = (SELECT ProjectID FROM Employees WHERE PositionID = (SELECT PositionID FROM Positions WHERE PositionName = 'Project Manager') AND EmployeeID = E.EmployeeID)
-LEFT JOIN Defects D ON P.ProjectID = D.ProjectID
-GROUP BY P.ProjectName, E.LastName, E.FirstName, E.MiddleName;
+    p.ProjectName,
+    pm.LastName,
+    pm.FirstName,
+    pm.MiddleName,
+    COUNT(d.DefectID) AS UnresolvedDefects
+FROM 
+    Projects p
+LEFT JOIN 
+    (
+        SELECT 
+            ep.ProjectID,
+            e.LastName,
+            e.FirstName,
+            e.MiddleName
+        FROM 
+            EmployeeProjects ep
+        JOIN 
+            Employees e ON e.EmployeeID = ep.EmployeeID
+        JOIN 
+            Positions pos ON pos.PositionID = e.PositionID
+        WHERE 
+            pos.PositionName = 'Project Manager'
+    ) pm ON p.ProjectID = pm.ProjectID
+LEFT JOIN 
+    Defects d ON d.ProjectID = p.ProjectID AND d.IsFixed = false
+GROUP BY 
+    p.ProjectName, pm.LastName, pm.FirstName, pm.MiddleName;
 
 -- 29. Выбрать количество исправленных дефектов по годам поквартально. 
 -- В результирующей таблице должно быть пять столбцов: 
