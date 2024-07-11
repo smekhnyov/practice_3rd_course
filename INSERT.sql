@@ -196,3 +196,21 @@ INSERT INTO DefectAssignees (DefectID, AssigneeID, IsResponsible) VALUES
 (19, 1, false), 
 (20, 3, true), 
 (20, 2, false); 
+
+
+INSERT INTO EmployeeProjects (EmployeeID, ProjectID) VALUES
+(1, 1),
+(2, 1),
+(4, 1),
+(3, 2),
+(12, 2),
+(10, 2),
+(3, 3),
+(1, 3),
+(11, 3),
+(9, 3),
+(5, 4),
+(2, 4),
+(6, 4),
+(7, 4),
+(8, 4);
