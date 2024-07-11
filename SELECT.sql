@@ -5,7 +5,7 @@ SELECT * FROM Priorities ORDER BY PriorityName;
 SELECT TypeName FROM DefectTypes ORDER BY TypeName DESC;
 
 -- 3. Выбрать фамилии и инициалы руководителей проектов. Результат отсортировать по длине фамилии.
-SELECT LastName, LEFT(FirstName, 1) || '.' || LEFT(MiddleName, 1) || '.' AS Initials
+SELECT LastName || ' ' || LEFT(FirstName, 1) || '.' || LEFT(MiddleName, 1) || '.' AS Initials
 FROM Employees 
 JOIN Positions ON Employees.PositionID = Positions.PositionID
 WHERE PositionName = 'Project Manager'
@@ -185,12 +185,12 @@ GROUP BY E.EmployeeID, E.LastName, E.FirstName, E.MiddleName;
 
 -- 22. Выбрать фамилии, имена, отчества сотрудников, 
 -- руководящих двумя-тремя проектами.
-SELECT E.LastName, E.FirstName, E.MiddleName
-FROM Employees E
-JOIN Positions P ON E.PositionID = P.PositionID
-WHERE P.PositionName = 'Project Manager'
-GROUP BY E.EmployeeID, E.LastName, E.FirstName, E.MiddleName
-HAVING COUNT(DISTINCT D.ProjectID) BETWEEN 2 AND 3;
+SELECT e.LastName, e.FirstName, e.MiddleName
+FROM Employees e
+JOIN EmployeeProjects ep ON e.EmployeeID = ep.EmployeeID
+WHERE e.PositionID = (SELECT PositionID FROM Positions WHERE PositionName = 'Project Manager')  -- Выбираем только руководителей проектов
+GROUP BY e.EmployeeID, e.LastName, e.FirstName, e.MiddleName
+HAVING COUNT(DISTINCT ep.ProjectID) BETWEEN 2 AND 3;
 
 -- 23. Выбрать id и название дефектов по проекту N, сменивших статус хотя бы дважды.
 SELECT D.DefectID, D.DefectName
