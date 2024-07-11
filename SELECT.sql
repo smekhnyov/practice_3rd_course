@@ -127,41 +127,61 @@ WHERE ProjectID = (SELECT ProjectID FROM Projects WHERE ProjectName = 'Project A
 AND ActualFixTime IS NOT NULL;
 
 -- 18. (Сложный запрос, объединяющий данные из многих таблиц)
+WITH LastStatusChange AS (
+    SELECT 
+        DefectID,
+        MAX(DateChanged) as LastChangeDate
+    FROM DefectStatusHistory
+    GROUP BY DefectID
+)
 SELECT 
-  P.ProjectName,
-  PM.LastName AS ProjectManagerLastName,
-  PM.FirstName AS ProjectManagerFirstName,
-  PM.MiddleName AS ProjectManagerMiddleName,
-  D.DateDiscovered,
-  D.DefectName,
-  D.ShortDescription,
-  D.DetailedDescription,
-  DE.LastName AS DiscoveredByLastName,
-  DE.FirstName AS DiscoveredByFirstName,
-  DE.MiddleName AS DiscoveredByMiddleName,
-  D.PlannedFixTime,
-  S.StatusName,
-  DSH.DateChanged AS StatusChangeDate,
-  Pr.PriorityName,
-  Pr.PriorityColor,
-  C.CommentText
-FROM Defects D
-JOIN Projects P ON D.ProjectID = P.ProjectID
-JOIN Employees PM ON P.ProjectID = (SELECT ProjectID FROM Employees WHERE PositionID = (SELECT PositionID FROM Positions WHERE PositionName = 'Project Manager') AND EmployeeID = PM.EmployeeID)
-JOIN Employees DE ON D.DiscoveredBy = DE.EmployeeID
-LEFT JOIN DefectStatusHistory DSH ON D.DefectID = DSH.DefectID
-LEFT JOIN Statuses S ON DSH.StatusID = S.StatusID
-LEFT JOIN Priorities Pr ON D.PriorityID = Pr.PriorityID
-LEFT JOIN Comments C ON D.DefectID = C.DefectID;
+    p.ProjectName,
+    e.LastName || ' ' || SUBSTRING(e.FirstName, 1, 1) || '. ' || SUBSTRING(e.MiddleName, 1, 1) || '.' AS ProjectManager,
+    d.DateDiscovered,
+    d.DefectName,
+    d.ShortDescription,
+    d.DetailedDescription,
+    MAX(de.LastName || ' ' || de.FirstName || ' ' || de.MiddleName) AS DiscoveredBy, -- Используем MAX для ФИО
+    d.PlannedFixTime,
+    s.StatusName,
+    lsc.LastChangeDate,
+    pr.PriorityName,
+    pr.PriorityColor,
+    STRING_AGG(c.CommentText, '; ') AS Comments
+FROM Defects d
+JOIN Projects p ON d.ProjectID = p.ProjectID
+JOIN Employees e ON p.ProjectID = e.PositionID  
+JOIN Employees de ON d.DiscoveredBy = de.EmployeeID
+JOIN Priorities pr ON d.PriorityID = pr.PriorityID
+LEFT JOIN LastStatusChange lsc ON d.DefectID = lsc.DefectID
+LEFT JOIN DefectStatusHistory dsh ON lsc.DefectID = dsh.DefectID AND lsc.LastChangeDate = dsh.DateChanged
+LEFT JOIN Statuses s ON dsh.StatusID = s.StatusID
+LEFT JOIN Comments c ON d.DefectID = c.DefectID
+GROUP BY 
+    p.ProjectName, 
+    ProjectManager, 
+    d.DateDiscovered, 
+    d.DefectName, 
+    d.ShortDescription, 
+    d.DetailedDescription, 
+    --  DiscoveredBy, --  Убираем ФИО из GROUP BY 
+    d.PlannedFixTime, 
+    s.StatusName, 
+    lsc.LastChangeDate, 
+    pr.PriorityName, 
+    pr.PriorityColor;
 
 -- 19. Выбрать количество дефектов, зафиксированных за текущий месяц клиентами 
 -- по двум проектам (конкретные названия подставьте сами).
-SELECT COUNT(*)
-FROM Defects
-WHERE EXTRACT(MONTH FROM DateDiscovered) = EXTRACT(MONTH FROM CURRENT_DATE)
-AND EXTRACT(YEAR FROM DateDiscovered) = EXTRACT(YEAR FROM CURRENT_DATE)
-AND DiscoveredBy IN (SELECT EmployeeID FROM Employees WHERE PositionID = (SELECT PositionID FROM Positions WHERE PositionName = 'Client'))
-AND ProjectID IN (SELECT ProjectID FROM Projects WHERE ProjectName IN ('Project Alpha', 'Project Beta')); -- Замените названия проектов
+SELECT 
+    COUNT(DISTINCT d.DefectID) AS DefectCount
+FROM Defects d
+JOIN Employees e ON d.DiscoveredBy = e.EmployeeID
+JOIN Positions p ON e.PositionID = p.PositionID
+WHERE p.PositionName = 'Client'
+  AND d.DateDiscovered >= DATE_TRUNC('month', CURRENT_DATE) -- Исправленное условие
+  AND d.DateDiscovered < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month' 
+  AND d.ProjectID IN (1, 3); 
 
 -- 20. Выбрать название проекта и количество исправленных дефектов по проекту.
 SELECT 
