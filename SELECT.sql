@@ -287,10 +287,21 @@ WHERE IsFixed = FALSE
 ORDER BY DateDiscovered;
 
 -- 31. Выбрать названия проектов, для которых не назначен руководитель.
-SELECT P.ProjectName
-FROM Projects P
-LEFT JOIN Employees E ON P.ProjectID = (SELECT ProjectID FROM Employees WHERE PositionID = (SELECT PositionID FROM Positions WHERE PositionName = 'Project Manager') AND EmployeeID = E.EmployeeID)
-WHERE E.EmployeeID IS NULL;
+LEFT JOIN 
+    (
+        SELECT 
+            ep.ProjectID
+        FROM 
+            EmployeeProjects ep
+        JOIN 
+            Employees e ON e.EmployeeID = ep.EmployeeID
+        JOIN 
+            Positions pos ON pos.PositionID = e.PositionID
+        WHERE 
+            pos.PositionName = 'Project Manager'
+    ) pm ON p.ProjectID = pm.ProjectID
+WHERE 
+    pm.ProjectID IS NULL;
 
 -- 32. Вывести сообщение «Решение проблем затягивается», 
 -- если есть нерешенные проблемы с прошедшей запланированной датой решения.
