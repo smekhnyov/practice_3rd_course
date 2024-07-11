@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS DefectDependencies CASCADE;
 DROP TABLE IF EXISTS DefectAssignees CASCADE;
 DROP TABLE IF EXISTS Positions CASCADE;
 DROP TABLE IF EXISTS PositionTypes CASCADE;
+DROP TABLE IF EXISTS EmployeeProjects CASCADE;
 
 CREATE TABLE IF NOT EXISTS Defects (
 	DefectID serial NOT NULL UNIQUE,
@@ -98,6 +99,12 @@ CREATE TABLE IF NOT EXISTS DefectAssignees (
 	PRIMARY KEY (DefectID, AssigneeID)
 );
 
+CREATE TABLE IF NOT EXISTS EmployeeProjects (
+    EmployeeID bigint NOT NULL,
+    ProjectID bigint NOT NULL,
+    PRIMARY KEY (EmployeeID, ProjectID)
+);
+
 ALTER TABLE Defects ADD CONSTRAINT Defects_fk5 FOREIGN KEY (DiscoveredBy) REFERENCES Employees(EmployeeID);
 
 ALTER TABLE Defects ADD CONSTRAINT Defects_fk6 FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID);
@@ -124,3 +131,6 @@ ALTER TABLE DefectDependencies ADD CONSTRAINT DefectDependencies_fk1 FOREIGN KEY
 ALTER TABLE DefectAssignees ADD CONSTRAINT DefectAssignees_fk0 FOREIGN KEY (DefectID) REFERENCES Defects(DefectID);
 
 ALTER TABLE DefectAssignees ADD CONSTRAINT DefectAssignees_fk1 FOREIGN KEY (AssigneeID) REFERENCES Employees(EmployeeID);
+
+ALTER TABLE EmployeeProjects ADD CONSTRAINT EmployeeProjects_fk1 FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID);
+ALTER TABLE EmployeeProjects ADD CONSTRAINT EmployeeProjects_fk2 FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID);
