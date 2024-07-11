@@ -5,9 +5,10 @@ SELECT * FROM Priorities ORDER BY PriorityName;
 SELECT TypeName FROM DefectTypes ORDER BY TypeName DESC;
 
 -- 3. Выбрать фамилии и инициалы руководителей проектов. Результат отсортировать по длине фамилии.
-SELECT LastName, SUBSTRING(FirstName, 1, 1) || '.' || SUBSTRING(MiddleName, 1, 1) || '.' AS Initials
-FROM Employees
-WHERE PositionID = (SELECT PositionID FROM Positions WHERE PositionName = 'Project Manager')
+SELECT LastName, LEFT(FirstName, 1) || '.' || LEFT(MiddleName, 1) || '.' AS Initials
+FROM Employees 
+JOIN Positions ON Employees.PositionID = Positions.PositionID
+WHERE PositionName = 'Project Manager'
 ORDER BY LENGTH(LastName);
 
 -- 4. Выбрать годы обнаружения дефектов без повторений. Результат отсортировать по убыванию.
@@ -40,7 +41,8 @@ ORDER BY LastName DESC, FirstName DESC, MiddleName DESC;
 SELECT DISTINCT D.*
 FROM Defects D
 JOIN Comments C ON D.DefectID = C.DefectID
-WHERE C.CommentText LIKE ANY (ARRAY['%-%','%_%','%$%','%^%','%%%','%#%']);
+WHERE C.CommentText IS NOT NULL
+AND C.CommentText ~ '[-_$%^#]'
 
 -- 8. Выбрать все данные о дефектах c id 2, 3, 5, 9, 11, 12. 
 -- Результат отсортировать: вначале зафиксированные ночью (00:00 - 06:00), затем все остальные.
@@ -98,18 +100,16 @@ JOIN Positions P ON E.PositionID = P.PositionID
 ORDER BY E.LastName, E.FirstName DESC, E.MiddleName DESC;
 
 -- 14. Выбрать данные обо всех разработчиках проекта N (значение подставьте сами).
-SELECT E.*
-FROM Employees E
-JOIN DefectAssignees DA ON E.EmployeeID = DA.AssigneeID
-JOIN Defects D ON DA.DefectID = D.DefectID
-WHERE D.ProjectID = 1 -- Замените 1 на ID нужного проекта
-AND E.PositionID = (SELECT PositionID FROM Positions WHERE PositionName = 'Developer');
+SELECT e.FirstName, e.LastName
+FROM Employees e
+JOIN EmployeeProjects ep ON e.EmployeeID = ep.EmployeeID
+WHERE ep.ProjectID = 4 AND e.PositionID = (SELECT PositionID FROM Positions WHERE PositionName = 'Developer');
 
 -- 15. Выбрать дату, когда был зафиксирован последний дефект 
 -- по проекту N (название проекта подставьте сами).
 SELECT MAX(DateDiscovered)
 FROM Defects
-WHERE ProjectID = (SELECT ProjectID FROM Projects WHERE ProjectName = 'Project Alpha'); -- Замените название проекта
+WHERE ProjectID = (SELECT ProjectID FROM Projects WHERE ProjectID = 2);
 
 -- 16. Выбрать среднее время исправления дефектов.
 SELECT AVG(ActualFixTime - DateDiscovered) AS AverageFixTime
@@ -123,7 +123,7 @@ SELECT
   SUM(PlannedFixTime - DateDiscovered) AS TotalPlannedTime,
   SUM(ActualFixTime - DateDiscovered) AS TotalActualTime
 FROM Defects
-WHERE ProjectID = (SELECT ProjectID FROM Projects WHERE ProjectName = 'Project Alpha') -- Замените название проекта
+WHERE ProjectID = (SELECT ProjectID FROM Projects WHERE ProjectName = 'Project Alpha')
 AND ActualFixTime IS NOT NULL;
 
 -- 18. (Сложный запрос, объединяющий данные из многих таблиц)
