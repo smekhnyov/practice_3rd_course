@@ -2,7 +2,8 @@ INSERT INTO Projects (ProjectName) VALUES
 ('Project Alpha'),
 ('Project Beta'),
 ('Project Gamma'),
-('Project Shtrih');
+('Project Shtrih'),
+('Project Sigma');
 
 INSERT INTO Positions (PositionName) VALUES 
 ('Developer'),
@@ -221,4 +222,5 @@ INSERT INTO EmployeeProjects (EmployeeID, ProjectID) VALUES
 (2, 4),
 (6, 4),
 (7, 4),
-(8, 4);
+(8, 4),
+(3, 5);
