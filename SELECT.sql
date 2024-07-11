@@ -17,10 +17,10 @@ ORDER BY DiscoveryYear DESC;
 
 -- 5. Выбрать названия проектов, состоящие только из латинских букв. 
 -- Результат отсортировать: вначале четные id, затем нечетные.
-SELECT ProjectName
-FROM Projects
-WHERE ProjectName ~ '^[a-zA-Z]+$'
-ORDER BY ProjectID % 2, ProjectName;
+SELECT ProjectName 
+FROM Projects 
+WHERE ProjectName ~ '^[A-Za-z ]+$'
+ORDER BY MOD(ProjectID, 2), ProjectID;
 
 -- 6. Выбрать фамилии, имена, отчества клиентов с двойной фамилией 
 -- или с фамилией из 5–7 букв, заканчивающейся на -в или -ов. 
@@ -28,7 +28,11 @@ ORDER BY ProjectID % 2, ProjectName;
 SELECT LastName, FirstName, MiddleName
 FROM Employees
 WHERE PositionID = (SELECT PositionID FROM Positions WHERE PositionName = 'Client')
-AND ((LastName LIKE '% %') OR (LENGTH(LastName) BETWEEN 5 AND 7 AND LastName LIKE '%[во]в'))
+AND (
+    (LastName LIKE '%-%') 
+    OR (LENGTH(LastName) BETWEEN 5 AND 7 AND LastName LIKE '%в') 
+    OR (LENGTH(LastName) BETWEEN 5 AND 7 AND LastName LIKE '%ов')
+)
 ORDER BY LastName DESC, FirstName DESC, MiddleName DESC;
 
 -- 7. Выбрать все данные о проблемах, в комментариях к которым 
