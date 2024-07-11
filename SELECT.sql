@@ -374,12 +374,17 @@ LEFT JOIN Defects D ON P.ProjectID = D.ProjectID
 GROUP BY P.ProjectName;
 
 -- 38. Выбрать всех участников проектов, в которых менее трех человек.
-SELECT DISTINCT E.LastName, E.FirstName, E.MiddleName
-FROM Employees E
-JOIN DefectAssignees DA ON E.EmployeeID = DA.AssigneeID
-JOIN Defects D ON DA.DefectID = D.DefectID
-GROUP BY D.ProjectID, E.EmployeeID, E.LastName, E.FirstName, E.MiddleName
-HAVING COUNT(DISTINCT DA.AssigneeID) < 3;
+SELECT p.ProjectName, e.FirstName, e.LastName, e.MiddleName
+FROM Projects p
+JOIN (
+    SELECT ProjectID, COUNT(EmployeeID) AS EmployeeCount
+    FROM EmployeeProjects
+    GROUP BY ProjectID
+    HAVING COUNT(EmployeeID) < 3
+) AS proj_counts ON p.ProjectID = proj_counts.ProjectID
+JOIN EmployeeProjects ep ON p.ProjectID = ep.ProjectID
+JOIN Employees e ON ep.EmployeeID = e.EmployeeID;
+
 
 -- 39. Выбрать названия всех проектов, если у проекта есть руководитель, 
 -- то фамилию и инициалы руководителя, если по проекту есть проблемы, 
