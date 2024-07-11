@@ -422,25 +422,42 @@ ORDER BY
 
 -- 40. Выбрать названия проектов, в которых количество разработчиков 
 -- превышает среднее количество разработчиков по проектам.
-SELECT P.ProjectName
-FROM Projects P
-JOIN Defects D ON P.ProjectID = D.ProjectID
-JOIN DefectAssignees DA ON D.DefectID = DA.DefectID
-JOIN Employees E ON DA.AssigneeID = E.EmployeeID
-WHERE E.PositionID = (SELECT PositionID FROM Positions WHERE PositionName = 'Developer')
-GROUP BY P.ProjectName
-HAVING COUNT(DISTINCT E.EmployeeID) > (
-  SELECT AVG(DeveloperCount)
-  FROM (
-    SELECT P.ProjectID, COUNT(DISTINCT E.EmployeeID) AS DeveloperCount
-    FROM Projects P
-    JOIN Defects D ON P.ProjectID = D.ProjectID
-    JOIN DefectAssignees DA ON D.DefectID = DA.DefectID
-    JOIN Employees E ON DA.AssigneeID = E.EmployeeID
-    WHERE E.PositionID = (SELECT PositionID FROM Positions WHERE PositionName = 'Developer')
-    GROUP BY P.ProjectID
-  ) AS AvgDevelopers
-);
+WITH DeveloperCounts AS (
+    SELECT 
+        p.ProjectID,
+        p.ProjectName,
+        COUNT(e.EmployeeID) AS DeveloperCount
+    FROM 
+        Projects p
+    LEFT JOIN 
+        EmployeeProjects ep ON p.ProjectID = ep.ProjectID
+    LEFT JOIN 
+        Employees e ON ep.EmployeeID = e.EmployeeID
+    INNER JOIN
+        Positions pos ON e.PositionID = pos.PositionID
+    WHERE 
+        pos.PositionName = 'Developer'
+    GROUP BY 
+        p.ProjectID, p.ProjectName
+),
+AverageDeveloperCount AS (
+    SELECT 
+        AVG(DeveloperCount) AS AvgDeveloperCount
+    FROM 
+        DeveloperCounts
+)
+SELECT 
+    dc.ProjectName,
+    dc.DeveloperCount,
+    adc.AvgDeveloperCount
+FROM 
+    DeveloperCounts dc,
+    AverageDeveloperCount adc
+WHERE 
+    dc.DeveloperCount > adc.AvgDeveloperCount
+ORDER BY 
+    dc.ProjectName;
+
 
 -- 41. Выбрать дефекты, которые заблокированы другими дефектами.
 SELECT D1.*
