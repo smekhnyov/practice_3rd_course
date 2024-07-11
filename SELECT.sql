@@ -390,16 +390,35 @@ JOIN Employees e ON ep.EmployeeID = e.EmployeeID;
 -- то фамилию и инициалы руководителя, если по проекту есть проблемы, 
 -- то количество исправленных и количество неисправленных дефектов.
 SELECT 
-  P.ProjectName,
-  PM.LastName AS ProjectManagerLastName,
-  PM.FirstName AS ProjectManagerFirstName,
-  PM.MiddleName AS ProjectManagerMiddleName,
-  SUM(CASE WHEN D.IsFixed = TRUE THEN 1 ELSE 0 END) AS FixedDefects,
-  SUM(CASE WHEN D.IsFixed = FALSE THEN 1 ELSE 0 END) AS UnfixedDefects
-FROM Projects P
-LEFT JOIN Employees PM ON P.ProjectID = (SELECT ProjectID FROM Employees WHERE PositionID = (SELECT PositionID FROM Positions WHERE PositionName = 'Project Manager') AND EmployeeID = PM.EmployeeID)
-LEFT JOIN Defects D ON P.ProjectID = D.ProjectID
-GROUP BY P.ProjectName, PM.LastName, PM.FirstName, PM.MiddleName;
+    p.ProjectName,
+    CONCAT(e.LastName, ' ', LEFT(e.FirstName, 1), '.', LEFT(e.MiddleName, 1), '.') AS ProjectManager,
+    COALESCE(SUM(CASE WHEN d.IsFixed = TRUE THEN 1 ELSE 0 END), 0) AS FixedDefectsCount,
+    COALESCE(SUM(CASE WHEN d.IsFixed = FALSE THEN 1 ELSE 0 END), 0) AS UnfixedDefectsCount
+FROM 
+    Projects p
+LEFT JOIN 
+    (SELECT 
+         e.EmployeeID,
+         e.LastName,
+         e.FirstName,
+         e.MiddleName,
+         e.PositionID,
+         ep.ProjectID
+     FROM 
+         Employees e
+     INNER JOIN
+         Positions pos ON e.PositionID = pos.PositionID
+     INNER JOIN
+         EmployeeProjects ep ON e.EmployeeID = ep.EmployeeID
+     WHERE 
+         pos.PositionName = 'Project Manager') e ON p.ProjectID = e.ProjectID
+LEFT JOIN 
+    Defects d ON p.ProjectID = d.ProjectID
+GROUP BY 
+    p.ProjectID, p.ProjectName, e.LastName, e.FirstName, e.MiddleName
+ORDER BY 
+    p.ProjectName;
+
 
 -- 40. Выбрать названия проектов, в которых количество разработчиков 
 -- превышает среднее количество разработчиков по проектам.
