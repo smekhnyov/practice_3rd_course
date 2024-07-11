@@ -63,7 +63,10 @@ INSERT INTO Defects (DefectName, ShortDescription, DetailedDescription, DateDisc
 ('Broken Footer Links', 'Footer links are broken', 'Several links in the footer are broken and lead to 404 errors.', '2024-06-13 14:00:00+00', 1, 2, 2, 3, '2024-06-15 14:00:00+00', NULL, false),
 ('Incorrect User Data', 'User data displayed incorrectly', 'Some user data fields are displayed incorrectly on the profile page.', '2024-06-15 09:45:00+00', 2, 3, 2, 2, '2024-06-20 09:45:00+00', NULL, false),
 ('Performance Degradation', 'App performance degrades over time', 'The application performance degrades after prolonged usage, affecting user experience.', '2024-06-20 16:00:00+00', 1, 1, 1, 5, '2024-06-25 16:00:00+00', NULL, false),
-('Email Notifications Not Sent', 'Email notifications are not being sent', 'Users are not receiving email notifications for important events.', '2024-06-25 11:30:00+00', 2, 2, 3, 1, '2024-06-30 11:30:00+00', NULL, false);
+('Email Notifications Not Sent', 'Email notifications are not being sent', 'Users are not receiving email notifications for important events.', '2024-06-25 11:30:00+00', 2, 2, 3, 1, '2024-06-30 11:30:00+00', NULL, false),
+('UI Color Issue', 'Color inconsistency in UI', 'Some buttons have incorrect colors in the UI.', '2024-07-05 10:00:00+00', 1, 1, 2, 1, '2024-07-07 10:00:00+00', '2024-07-08 10:00:00+00', true),
+('Performance Drop on Dashboard', 'Dashboard loading slowly', 'The dashboard loads significantly slower than usual.', '2024-07-10 11:00:00+00', 1, 2, 1, 2, '2024-07-12 11:00:00+00', NULL, false),
+('API Integration Failure', 'Integration with API not working', 'The application fails to integrate with the external API.', '2024-07-11 10:00:00+00', 2, 3, 3, 3, '2024-07-20 12:00:00+00', NULL, false);
 
 INSERT INTO Comments (DefectID, CommentText, CommentedBy, CommentTime) VALUES 
 (1, 'This issue occurs intermittently.', 2, '2023-07-01 11:00:00+00'),
