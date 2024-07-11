@@ -58,7 +58,12 @@ INSERT INTO Defects (DefectName, ShortDescription, DetailedDescription, DateDisc
 ('Performance Degradation in Reports', 'Reports load slowly', 'Report generation is significantly slower after the latest update.', '2024-02-15 11:00:00+00', 3, 1, 1, 2, '2024-02-20 11:00:00+00', '2024-02-21 12:00:00+00', true),
 ('Incorrect Error Messages', 'Misleading error messages', 'Error messages displayed to users are misleading and incorrect.', '2024-03-20 14:00:00+00', 6, 2, 2, 3, '2024-03-25 14:00:00+00', '2024-03-26 15:00:00+00', true),
 ('Data Sync Failure', 'Data not syncing properly', 'Data between the local application and the server is not syncing correctly.', '2024-04-22 09:00:00+00', 2, 4, 3, 4, '2024-04-30 09:00:00+00', NULL, false),
-('User Interface Glitch', 'UI glitch on profile page', 'A glitch occurs on the user profile page when editing details.', '2024-05-18 16:00:00+00', 7, 3, 2, 5, '2024-05-25 16:00:00+00', '2024-05-26 17:00:00+00', true);
+('User Interface Glitch', 'UI glitch on profile page', 'A glitch occurs on the user profile page when editing details.', '2024-05-18 16:00:00+00', 7, 3, 2, 5, '2024-05-25 16:00:00+00', '2024-05-26 17:00:00+00', true),
+('Session Timeout Issue', 'User session times out too quickly', 'The user session times out after a short period of inactivity, causing inconvenience.', '2024-06-12 10:30:00+00', 2, 1, 1, 4, '2024-07-10 10:30:00+00', NULL, false),
+('Broken Footer Links', 'Footer links are broken', 'Several links in the footer are broken and lead to 404 errors.', '2024-06-13 14:00:00+00', 1, 2, 2, 3, '2024-06-15 14:00:00+00', NULL, false),
+('Incorrect User Data', 'User data displayed incorrectly', 'Some user data fields are displayed incorrectly on the profile page.', '2024-06-15 09:45:00+00', 2, 3, 2, 2, '2024-06-20 09:45:00+00', NULL, false),
+('Performance Degradation', 'App performance degrades over time', 'The application performance degrades after prolonged usage, affecting user experience.', '2024-06-20 16:00:00+00', 1, 1, 1, 5, '2024-06-25 16:00:00+00', NULL, false),
+('Email Notifications Not Sent', 'Email notifications are not being sent', 'Users are not receiving email notifications for important events.', '2024-06-25 11:30:00+00', 2, 2, 3, 1, '2024-06-30 11:30:00+00', NULL, false);
 
 INSERT INTO Comments (DefectID, CommentText, CommentedBy, CommentTime) VALUES 
 (1, 'This issue occurs intermittently.', 2, '2023-07-01 11:00:00+00'),
