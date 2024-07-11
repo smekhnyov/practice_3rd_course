@@ -42,7 +42,7 @@ SELECT DISTINCT D.*
 FROM Defects D
 JOIN Comments C ON D.DefectID = C.DefectID
 WHERE C.CommentText IS NOT NULL
-AND C.CommentText ~ '[-_$%^#]'
+AND C.CommentText ~ '[-_$%^#]';
 
 -- 8. Выбрать все данные о дефектах c id 2, 3, 5, 9, 11, 12. 
 -- Результат отсортировать: вначале зафиксированные ночью (00:00 - 06:00), затем все остальные.
