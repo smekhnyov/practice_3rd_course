@@ -313,7 +313,25 @@ SELECT
   END AS Message;
 
 -- 33. Выбрать названия статусов, совпадающие с названием результата.
--- (Необходимо уточнить, что подразумевается под "названием результата")
+-- (Blocked, Closed = true; Open, In progress, Pending = false)
+SELECT 
+    s.StatusName
+FROM 
+    Statuses s
+JOIN 
+    (
+        SELECT DISTINCT
+            CASE
+                WHEN d.IsFixed = false THEN 'Open'
+                WHEN d.IsFixed = false THEN 'In progress'
+                WHEN d.IsFixed = false THEN 'Pending'
+                WHEN d.IsFixed = true THEN 'Closed'
+                WHEN d.IsFixed = true THEN 'Blocked'
+            END AS ResultStatus
+        FROM 
+            Defects d
+    ) rs ON s.StatusName = rs.ResultStatus;
+
 
 -- 34. Выбрать все данные по последнему зафиксированному дефекту.
 SELECT *
