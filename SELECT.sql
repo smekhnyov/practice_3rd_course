@@ -255,7 +255,8 @@ SELECT
   DSH.DateChanged AS StatusChangeDate
 FROM Defects D
 CROSS JOIN Statuses S
-LEFT JOIN DefectStatusHistory DSH ON D.DefectID = DSH.DefectID AND S.StatusID = DSH.StatusID;
+LEFT JOIN DefectStatusHistory DSH ON D.DefectID = DSH.DefectID AND S.StatusID = DSH.StatusID
+ORDER BY D.DefectID, S.StatusID;
 
 
 -- 28. Выбрать название проекта, фамилию, имя, отчество руководителя проекта и, 
