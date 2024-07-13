@@ -549,40 +549,41 @@ ORDER BY DateDiscovered DESC
 LIMIT 3;
 
 -- 47. Выбрать дефекты с ошибками перехода статуса.
--- (Необходимо уточнить условия, при которых переход статуса считается ошибочным)
-WITH StatusTransitions AS (
-    SELECT
-        dsh1.DefectID,
-        dsh1.StatusID AS FromStatusID,
-        dsh2.StatusID AS ToStatusID,
-        s1.StatusName AS FromStatusName,
-        s2.StatusName AS ToStatusName,
-        dsh2.DateChanged
-    FROM
-        DefectStatusHistory dsh1
-    JOIN
-        DefectStatusHistory dsh2 ON dsh1.DefectID = dsh2.DefectID
-    JOIN
-        Statuses s1 ON dsh1.StatusID = s1.StatusID
-    JOIN
-        Statuses s2 ON dsh2.StatusID = s2.StatusID
-    WHERE
-        dsh1.DateChanged < dsh2.DateChanged
-        AND (s1.StatusName = 'Blocked' OR s1.StatusName = 'Closed')
+-- За ошибку перехода статуса считается, когда статус NULL, когда статус никогда не был в статусе Open и когда статус перешел из Closed в любой другой
+WITH LatestStatus AS (
+    SELECT 
+        D.DefectID,
+        MAX(DSH.DateChanged) AS LastChangeDate
+    FROM Defects D
+    LEFT JOIN DefectStatusHistory DSH ON D.DefectID = DSH.DefectID
+    GROUP BY D.DefectID
+),
+StatusCheck AS (
+    SELECT 
+        D.DefectID,
+        MAX(CASE WHEN S.StatusName = 'Open' THEN 1 ELSE 0 END) AS HasOpenStatus,
+        MAX(CASE WHEN S.StatusName = 'Closed' THEN DSH.DateChanged ELSE NULL END) AS LastClosedDate,
+        MAX(CASE WHEN DSH.DateChanged = LS.LastChangeDate THEN S.StatusName ELSE NULL END) AS CurrentStatus
+    FROM Defects D
+    LEFT JOIN DefectStatusHistory DSH ON D.DefectID = DSH.DefectID
+    LEFT JOIN Statuses S ON DSH.StatusID = S.StatusID
+    LEFT JOIN LatestStatus LS ON D.DefectID = LS.DefectID
+    GROUP BY D.DefectID
 )
-SELECT
-    DISTINCT d.DefectID,
-    d.DefectName,
-    d.ProjectID,
-    st.FromStatusName,
-    st.ToStatusName,
-    st.DateChanged
-FROM
-    StatusTransitions st
-JOIN
-    Defects d ON st.DefectID = d.DefectID
-ORDER BY
-    d.DefectID, st.DateChanged;
+SELECT 
+    D.DefectID,
+    D.DefectName,
+    CASE
+        WHEN SC.CurrentStatus IS NULL THEN 'Status is NULL'
+        WHEN SC.HasOpenStatus = 0 THEN 'Never in Open status'
+        WHEN SC.LastClosedDate IS NOT NULL AND SC.CurrentStatus <> 'Closed' THEN 'Status changed after Closed'
+    END AS StatusError
+FROM Defects D
+LEFT JOIN StatusCheck SC ON D.DefectID = SC.DefectID
+WHERE SC.CurrentStatus IS NULL
+   OR SC.HasOpenStatus = 0
+   OR (SC.LastClosedDate IS NOT NULL AND SC.CurrentStatus <> 'Closed');
+
 
 
 -- 48. Выбрать для каждой даты текущего месяца количество зафиксированных дефектов. 
