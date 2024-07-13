@@ -312,6 +312,8 @@ WHERE IsFixed = FALSE
 ORDER BY DateDiscovered;
 
 -- 31. Выбрать названия проектов, для которых не назначен руководитель.
+SELECT p.ProjectName
+FROM Projects P
 LEFT JOIN 
     (
         SELECT 
